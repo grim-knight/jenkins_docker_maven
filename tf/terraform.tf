@@ -17,7 +17,7 @@ resource "aws_security_group" "flask_app_sg" {
     from_port = 22
     to_port = 22
     protocol = "tcp"
-    cidr_blocks = ["70.120.100.125/32","52.54.254.122/32"]
+    cidr_blocks = ["70.120.100.125/32","52.54.254.122/32","24.242.173.10/32"]
  }
 
  egress{

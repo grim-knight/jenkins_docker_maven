@@ -2,7 +2,7 @@
 
 # Copy the new jar to the build location
 echo "I'm in directory - $PWD"
-cp -f java-app/target/*.jar jenkins/build/
+cp -f pipeline/java-app/target/*.jar pipeline/jenkins/build/
 
 echo "****************************"
 echo "** Building Docker Image ***"

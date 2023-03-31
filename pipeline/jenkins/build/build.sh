@@ -8,4 +8,5 @@ echo "****************************"
 echo "** Building Docker Image ***"
 echo "****************************"
 #building the aoolication with the jar.
+echo "I'm in directory - $PWD"
 cd jenkins/build/ && docker-compose -f docker-compose-build.yml build --no-cache

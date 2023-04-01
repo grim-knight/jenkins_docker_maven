@@ -7,12 +7,22 @@ pipeline {
     }
 
     stages {
-
+        // stage('checkout'){
+        //     steps {
+        //         git branch: 'main', credentialsId: '35319474-9ee1-4abc-85ae-64c68114f4de', url: 'https://github.com/grim-knight/jenkins_docker_maven.git'
+        //     }
+        // }
         stage('Build') {
             steps {
                 sh '''
+                    pwd
+                    ls -a
+                    pwd
                     ./pipeline/jenkins/build/mvn.sh mvn -B -DskipTests clean package
+                    pwd
+                    ls -a
                     ./pipeline/jenkins/build/build.sh
+                    pwd
                 '''
             }
 
@@ -25,7 +35,9 @@ pipeline {
 
         stage('Test') {
             steps {
-                sh './pipeline/jenkins/test/mvn.sh mvn test'
+                sh '''
+                pwd
+                ./pipeline/jenkins/test/mvn.sh mvn test'''
             }
 
             post {

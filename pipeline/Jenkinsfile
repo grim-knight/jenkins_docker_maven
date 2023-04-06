@@ -18,7 +18,7 @@ pipeline {
                     pwd
                     ls -a
                     pwd
-		    sudo chown 1000:1000 /var/run/docker.sock
+		    
                     ./pipeline/jenkins/build/mvn.sh mvn -B -DskipTests clean package
                     pwd
                     ls -a

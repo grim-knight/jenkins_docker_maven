@@ -3,9 +3,52 @@ provider "aws" {
   region = "us-east-1"
 }
 
+#create a VPC
+resource "aws_vpc" "vpc_jenkins"{
+	cidr_block = "172.0.0.0/16"
+	tags = {
+		Name = "vpc_jenkins"
+	}
+}
+
+#Create subnet
+resource "aws_subnet" "subnet_jenkins"{
+	cidr_block = "172.0.1.0/24"
+	vpc_id = aws_vpc.vpc_jenkins.id	
+	tags = {
+		Name = "Subnet_jenkins"
+	}
+}
+
+
+#Internet gateway
+resource "aws_internet_gateway" "jenkins_igw"{
+        vpc_id = aws_vpc.vpc_jenkins.id
+        tags = {
+                Name = "jenkins_igw"
+        }
+}
+
+#Route table for the internet gateway
+resource "aws_route_table" "rt"{
+	vpc_id = aws_vpc.vpc_jenkins.id
+	route{
+		cidr_block = "0.0.0.0/0"
+		gateway_id = aws_internet_gateway.jenkins_igw.id
+	}
+}
+
+
+#Associate the subnets to the route table
+resource "aws_route_table_association" "a" {
+  subnet_id      = aws_subnet.subnet_jenkins.id
+  route_table_id = aws_route_table.rt.id
+}
+
+
 resource "aws_security_group" "flask_app_sg" {
   name_prefix = "flask_app_sg"
-
+  vpc_id = aws_vpc.vpc_jenkins.id
   ingress {
     from_port = 80
     to_port = 80
@@ -24,7 +67,7 @@ resource "aws_security_group" "flask_app_sg" {
     from_port = 22
     to_port = 22
     protocol = "tcp"
-    cidr_blocks = ["70.120.100.125/32","52.54.254.122/32","44.195.129.92/32","24.242.173.10/32","54.161.114.126/32"]
+    cidr_blocks = ["70.120.100.125/32", "72.181.11.222/32", "44.201.57.218/32", "10.1.29.165/32","52.54.254.122/32","24.242.173.10/32","54.161.114.126/32"]
  }
 
  egress{
@@ -40,12 +83,19 @@ resource "aws_instance" "flask_app_instance" {
   ami           = "ami-0aa7d40eeae50c9a9"
   instance_type = "t2.medium"
   key_name = "sagartest"
+  associate_public_ip_address = true
   vpc_security_group_ids = [aws_security_group.flask_app_sg.id]
-
+  subnet_id = aws_subnet.subnet_jenkins.id
   # Define the user data script to install the necessary software and start the Flask application
   user_data = <<-EOF
               #!/bin/bash
-                sudo yum update -y
+              sudo yum update -y
+		mkdir -p /home/ec2-user/.ssh
+		echo "${file("/home/ec2-user/jenkins/jenkins_docker_maven/tf/prod.pub")}" > /home/ec2-user/.ssh/authorized_keys
+		chmod 700 /home/ec2-user/.ssh
+		chmod 600 /home/ec2-user/authorized_keys
+		echo "${file("/home/ec2-user/jenkins/jenkins_docker_maven/tf/prod")}" > /home/ec2-user/prod
+		chmod 600 /home/ec2-user/prod
               sudo yum install -y docker
               sudo service docker start
               sudo usermod -a -G docker ec2-user

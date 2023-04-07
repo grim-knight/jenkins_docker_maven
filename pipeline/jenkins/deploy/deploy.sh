@@ -9,5 +9,7 @@ echo "i got executed"
 echo "$PWD"
 rsync -avz -e "ssh -i /opt/prod" ./pipeline/jenkins/deploy/publish ec2-user@3.93.177.29:/tmp/publish
 echo "i got executed"
+echo "Changing permission for publish"
+ssh -i /opt/prod ec2-user@3.93.177.29 "chmod +x /tmp/publish"
 ssh -i /opt/prod ec2-user@3.93.177.29 "/tmp/publish"
 echo "Finally success"
